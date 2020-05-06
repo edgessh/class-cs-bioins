@@ -8,8 +8,12 @@ PARAMETROS:
 - codificacion real de 2 genes
 - menos de 5 decimales
 - seleccion por torneo
-- cruzamiento blx-0.5 
-- mutacion simple
+- mutacion uniforme
+- probabilidad de cruzamiento : 80%
+- probabilidad de mutacion : 10%
+- cruzamiento blx-0.5
+- iteraciones o generaciones: 100
+
 
 
 """
@@ -17,9 +21,13 @@ PARAMETROS:
 import math
 import numpy as np 
 import random
+import emoji
 
 # numero de individuos
 Number_individuals = 8
+alfa = 0.5
+minimun = -10.0
+maximun = 10.0
 
 #poblacion inicial
 # funcion que crea la poblacion inicial
@@ -76,8 +84,8 @@ def mating_pool(population):
         r2 = random.randint(0,Number_individuals-1)
         if(r1 != r2):
             print("Enfrentamiento: ", i)
-            print(r1, 'vs', r2)
-            print(population[r1,:] , " VS ", population[r2,:])
+            print(r1, "\U0001F19A", r2)
+            print(population[r1,:] , "\U0001F93C", population[r2,:])
             winner = fwinner(population[r1,:], population[r2,:])
             print("Ganador → ", winner)
             new_selected = np.append(new_selected, winner, 0)
@@ -100,35 +108,76 @@ def mating_pool(population):
     return new_selected
 
 # mating_pool(Initial_population)
-new = mating_pool(Initial_population)
+news_candidates = mating_pool(Initial_population)
 
 
+def cross_blx(parent1, parent2):
+    beta = round(random.uniform(-alfa, 1+alfa), 2)
+    print("CROSS-BLX")
+    print("BETA: ", beta)
+    # Cx = []
+    Cx = np.array([])
+    i = 0
 
+    # print(parent1[0])
+    # print(parent2[1])
+    # for i in range(2):
+    # var = parent1
+    while(i < 2):
+        var = parent1[i] + beta * (parent2[i]-parent1[i])
+        if( var <= maximun and var >= minimun):
+            # if(var <= maximun and var >= minimun):
+            print("C_", i,": ", var)
+            Cx = np.append(Cx, var)
+            i += 1
+        else:
+            beta = round(random.uniform(-alfa, 1+alfa), 2)
+            print("HIJO NO FACTIBLE / CALCULANDO NUEBA BETA: ", beta)
+                    
+    return Cx
+
+
+# seleccion de padres
 def mating_pool_2(candidates):
     i = 0
     parents = np.array([])
+    childs = np.array([])
     while(i < Number_individuals):
         random1 = random.randint(0,Number_individuals-1)
         random2 = random.randint(0,Number_individuals-1)
         if(random1 != random2):
             if(candidates[random1,0] != candidates[random2,0]):
-                print("PARENTS → ", random1, " <3 ", random2)
-                print(candidates[random1,:], " <3 ", candidates[random2,:])
+                print("PARENTS → ", random1, "\U0001F5A4", random2)
+                print(candidates[random1,:], "\U0001F498", candidates[random2,:])
                 parents = np.append(parents, np.array([candidates[random1,:], candidates[random2,:]]))
+                # whle()
+                one_child = cross_blx(candidates[random1,:], candidates[random2,:])
+                childs = np.append(childs, one_child)
+                # chooseparents 
+                # cross_blx
                 i += 1
             else:
                 continue
         else:
             continue
+    print("CHILDS / Nueva poblacion")
+    childs = np.reshape(childs, (Number_individuals, 2))
+    print(childs)
     return parents
     
 
 def choose_parents(candidates):
     a = mating_pool_2(candidates) 
+    print("PADRES CANDIDATOS")
     print(a)
     
-choose_parents(new)
+choose_parents(news_candidates)
 
+
+
+
+# print("CROSSING")
+# cross_blx(news_candidates)
 
 
 def exec():
