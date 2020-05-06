@@ -42,10 +42,10 @@ def fillP(n):
     return pop
 #round(random.uniform(-10,10),5)]
 Initial_population = fillP(Number_individuals)
-print("\nPOBLACION INICIAL\n")
-print(Initial_population)
+# print("\nPOBLACION INICIAL\n")
+# print(Initial_population)
 # size of rows = 0, size of columns = 1
-print(np.size(Initial_population, 0))
+# print(np.size(Initial_population, 0))
 
 # funcion f que se utiliza para calcular el fitness o aptitud
 def f(x, y):
@@ -61,7 +61,7 @@ def Fitness(array):
 fitness_arrays = Fitness(Initial_population)
 
 # seleccion por torneo
-print ("MATING POOL")
+# print ("MATING POOL")
 
 def fwinner(p1, p2):
     #gana el que tenga menor aptitud (minimizar funcion)
@@ -75,6 +75,7 @@ def fwinner(p1, p2):
         return p2
     
 
+# competicion por torneo
 def mating_pool(population):
     #seleccion de 8 peleas y 16 competidores
     i = 0
@@ -108,9 +109,9 @@ def mating_pool(population):
     return new_selected
 
 # mating_pool(Initial_population)
-news_candidates = mating_pool(Initial_population)
+# news_candidates = mating_pool(Initial_population)
 
-
+#cruzamiento blx de los padres
 def cross_blx(parent1, parent2):
     beta = round(random.uniform(-alfa, 1+alfa), 2)
     print("CROSS-BLX")
@@ -162,26 +163,39 @@ def mating_pool_2(candidates):
             continue
     print("CHILDS / Nueva poblacion")
     childs = np.reshape(childs, (Number_individuals, 2))
-    print(childs)
-    return parents
+    # print(childs)
+    return [parents, childs]
     
 
 def choose_parents(candidates):
-    a = mating_pool_2(candidates) 
+    a,b = mating_pool_2(candidates) 
     print("PADRES CANDIDATOS")
-    print(a)
+    # print(a,b)
     
-choose_parents(news_candidates)
-
-
-
+# choose_parents(news_candidates)
 
 # print("CROSSING")
 # cross_blx(news_candidates)
 
 
 def exec():
-    return 0
+    #condicion de termino = 100 generaciones
+    newP = Initial_population
+    for i in range(10):
+        print("|······\t ＩＴＥＲＡＣＩＯＮ: ", ",,",i, '\'\'', "\t······|")
+        newC = mating_pool(newP)
+        a,b = mating_pool_2(newC)
+        print("PADRES CANDIDATOS:", a)
+        print("NUEVA POBLACION: ", b)
+        newP = b
+    print("PRIMERA GENERACION: ",Initial_population)
+
+
+exec()
+
+        
+
+    
 
 
 # for i in range(30):
