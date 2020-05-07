@@ -28,6 +28,7 @@ Number_individuals = 8
 alfa = 0.5
 minimun = -10.0
 maximun = 10.0
+filesaved = open("lab01-1.txt", 'a')
 
 #poblacion inicial
 # funcion que crea la poblacion inicial
@@ -68,7 +69,10 @@ def fwinner(p1, p2):
     _p1 = f(p1[0],p1[1])
     _p2 = f(p2[0], p2[1])
     print("Aptitudes → ", _p1 , " «» ", _p2)
-    
+    filesaved.write("Aptitudes")
+    filesaved.write(str(_p1))
+    filesaved.write(str(_p2))
+
     if(_p1 < _p2):
         return p1
     else:
@@ -87,10 +91,17 @@ def mating_pool(population):
             print("Enfrentamiento: ", i)
             print(r1, "\U0001F19A", r2)
             print(population[r1,:] , "\U0001F93C", population[r2,:])
+            filesaved.write("Enfrentamiento: ")
+            filesaved.write(str(i))
+            filesaved.write(str(r1))
+            filesaved.write(str(r2))
+            filesaved.write(str(population[r1,:]))
+            filesaved.write(str(population[r2,:]))
             winner = fwinner(population[r1,:], population[r2,:])
             print("Ganador → ", winner)
+            filesaved.write("Ganador: ")
+            filesaved.write(str(winner))
             new_selected = np.append(new_selected, winner, 0)
-            print()
             # print(population[r1,:])
             # print(" VS ")
             # print(population[r2,:])
@@ -101,11 +112,12 @@ def mating_pool(population):
     
     # print(population[0,:])
     # print(population[8,:])
-            
+
 
     # print(population[0,:])
     new_selected = np.reshape(new_selected, (Number_individuals, 2))
     print(new_selected)
+    filesaved.write(str(new_selected))
     return new_selected
 
 # mating_pool(Initial_population)
@@ -116,6 +128,9 @@ def cross_blx(parent1, parent2):
     beta = round(random.uniform(-alfa, 1+alfa), 2)
     print("CROSS-BLX")
     print("BETA: ", beta)
+    filesaved.write("CROSS-BLX")
+    filesaved.write("BETA: ")
+    filesaved.write(str(beta))
     # Cx = []
     Cx = np.array([])
     i = 0
@@ -129,11 +144,18 @@ def cross_blx(parent1, parent2):
         if( var <= maximun and var >= minimun):
             # if(var <= maximun and var >= minimun):
             print("C_", i,": ", var)
+            filesaved.write("C_")
+            filesaved.write(str(i))
+            filesaved.write(str(var))
+
             Cx = np.append(Cx, var)
             i += 1
         else:
             beta = round(random.uniform(-alfa, 1+alfa), 2)
             print("HIJO NO FACTIBLE / CALCULANDO NUEBA BETA: ", beta)
+            filesaved.write("HIJO NO FACTIBLE / CALCULANDO NUEBA BETA: ")
+            filesaved.write(str(beta))
+
                     
     return Cx
 
@@ -150,6 +172,11 @@ def mating_pool_2(candidates):
             if(candidates[random1,0] != candidates[random2,0]):
                 print("PARENTS → ", random1, "\U0001F5A4", random2)
                 print(candidates[random1,:], "\U0001F498", candidates[random2,:])
+                filesaved.write("PARENTS")
+                filesaved.write(str(random1))
+                filesaved.write(str(random2))
+                filesaved.write(str(candidates[random1,:]))
+                filesaved.write(str(candidates[random2,:]))
                 parents = np.append(parents, np.array([candidates[random1,:], candidates[random2,:]]))
                 # whle()
                 one_child = cross_blx(candidates[random1,:], candidates[random2,:])
@@ -162,6 +189,7 @@ def mating_pool_2(candidates):
         else:
             continue
     print("CHILDS / Nueva poblacion")
+    filesaved.write("CHILDS / Nueva poblacion")
     childs = np.reshape(childs, (Number_individuals, 2))
     # print(childs)
     return [parents, childs]
@@ -170,6 +198,7 @@ def mating_pool_2(candidates):
 def choose_parents(candidates):
     a,b = mating_pool_2(candidates) 
     print("PADRES CANDIDATOS")
+    filesaved.write("PADRES CANDIDATOS")
     # print(a,b)
     
 # choose_parents(news_candidates)
@@ -183,13 +212,21 @@ def exec():
     newP = Initial_population
     for i in range(10):
         print("|······\t ＩＴＥＲＡＣＩＯＮ: ", ",,",i, '\'\'', "\t······|")
+        filesaved.write("ITERACION:")
+        filesaved.write(str(i))
         newC = mating_pool(newP)
         a,b = mating_pool_2(newC)
         print("PADRES CANDIDATOS:", a)
         print("NUEVA POBLACION: ", b)
+        filesaved.write("PADRES CANDIDATOS:")
+        filesaved.write(str(a))
+        filesaved.write("NUEVA POBLACION: ")
+        filesaved.write(str(b))
         newP = b
     print("PRIMERA GENERACION: ",Initial_population)
-
+    filesaved.write("PRIMERA GENERACION: ")
+    filesaved.write(str(Initial_population))
+    filesaved.close()
 
 exec()
 
