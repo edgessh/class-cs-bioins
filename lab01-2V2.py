@@ -11,7 +11,7 @@ Implementa un Algoritmo Genético para minimizar el siguiente problema TSP:
 - cantidad de genes por individuo: 10
 - seleccion por ruleta
 - probabilidad de cruzamiento: 0.9
-- cruzamiento pbx
+- cruzamiento obx
 - probabilidad de mutacion: 0.05
 - mutacion simple
 """

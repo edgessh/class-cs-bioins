@@ -60,7 +60,7 @@ def Fitness(array):
         fit = np.append(fit, f(item[0], item[1]))
     return fit
 fitness_arrays = Fitness(Initial_population)
-
+# print(fitness_arrays)
 # seleccion por torneo
 # print ("MATING POOL")
 
@@ -170,8 +170,8 @@ def mating_pool_2(candidates):
         random2 = random.randint(0,Number_individuals-1)
         if(random1 != random2):
             if(candidates[random1,0] != candidates[random2,0]):
-                print("PARENTS → ", random1, "\U0001F5A4", random2)
-                print(candidates[random1,:], "\U0001F498", candidates[random2,:])
+                print("PARENTS → ", random1, " <-> ", random2)
+                print(candidates[random1,:], " <-> ", candidates[random2,:])
                 filesaved.write("PARENTS")
                 filesaved.write(str(random1))
                 filesaved.write(str(random2))
@@ -210,7 +210,13 @@ def choose_parents(candidates):
 def exec():
     #condicion de termino = 100 generaciones
     newP = Initial_population
+    print("POBLACION INICIAL")
+    print(newP)
+    # fitt = Fitness(newP)
     for i in range(10):
+        print("FITNESS")
+        fitt = Fitness(newP)
+        print(fitt)
         print("|······\t ＩＴＥＲＡＣＩＯＮ: ", ",,",i, '\'\'', "\t······|")
         filesaved.write("ITERACION:")
         filesaved.write(str(i))
