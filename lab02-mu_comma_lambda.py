@@ -29,7 +29,7 @@ import math
 import scipy.stats
 
 var_mu = 8 #cantidad de individuos
-var_lambda = 1 #cantidad de descendientes
+var_lambda = 10 #cantidad de descendientes
 sigma = 0.2 #desviacion estandar inicial
 torneos = 2
 iteraciones = 1000
