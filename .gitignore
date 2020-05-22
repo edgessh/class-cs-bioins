@@ -1,3 +1,5 @@
 *.zip
 *.txt
 log
+*.gv
+*.pdf
