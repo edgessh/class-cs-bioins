@@ -241,9 +241,26 @@ def generate_population(cant):
         list_of_inds.append(recursive_mef(inds))
     return list_of_inds
 
+def internal_mef(state, input):
+    """procesado interno del mef
+    Arguments:
+        state {string} -- valor de el diccionario con clave state
+        input {char} -- entrada, puede ser 1 o 0
+    Returns:
+        char, char -- salida de un estado , estado objetivo
+    """
+    output = ''
+    new_state = ''
+    if(input == state[1]):
+        output = state[3]
+        new_state = state[5]
+    if(input == state[2]):
+        output = state[4]
+        new_state = state[6]
+    return output, new_state
+
 def mef(sinput, ind, table, sinit):
     """maquina de estado finito que calcula la cadena de salida dado la cadena de entrada y sus estados
-
     Arguments:
         sinput {string} -- secuencia de entrada dado por el enunciado
         ind {string} -- individuo 
@@ -256,21 +273,12 @@ def mef(sinput, ind, table, sinit):
     soutput = ''
     s_actual = sinit
     for i in range(input_size):
-        if(table[s_actual][1] == '0'):
-            soutput += (table[s_actual][3])
-            s_actual = table[s_actual][5]
-        elif(table[s_actual][1] == '1'):
-            soutput += (table[s_actual][3])
-        elif(table[s_actual][2] == '0':
-            pass
-        elif(table[s_actual][2] == '1'):
-            pass
-        print('Input: ', table[s_actual][1])
-        print('Input: ', table[s_actual][2])
-        
-
-
-    return sinput
+        op, ns = internal_mef(table[s_actual], sinput[i])
+        s_actual = ns 
+        soutput += op
+        print('Estado actual: ', s_actual)
+        print('Salidas: ', soutput  )
+    return soutput
 
 def calc_seq_out(sec, ind):
     """Calcula la secuencia de salida dada la secuencia de entrada y un individuo
@@ -286,7 +294,7 @@ def calc_seq_out(sec, ind):
     calc = {'A':a, 'B':b, 'C':c, 'D':d, 'E':e}
     sec_in = sec
     # seq_out =
-    print("calc")
+    print("calc - tabla de estados")
     print(calc)
     S = ''
     if(ind[0] == '2'):
@@ -301,15 +309,7 @@ def calc_seq_out(sec, ind):
         S = 'E'
     else:
         pass
-
     sec_out = mef(sec_in, ind, calc, S)
-
-
-    
-    
-    # print(calc['A'])
-
-
     return sec_out
 
 def fitness(secuencia, individuo):
@@ -323,20 +323,99 @@ def fitness(secuencia, individuo):
     seq_in = secuencia
     seq_out = calc_seq_out(seq_in, individuo)
     size_ind = len(individuo)
+    size_seq = len(seq_in)
+    matchs = 0
+    i = 1
+    while(i < size_seq):
+        if(seq_in[i] == seq_out[i-1]):
+            matchs += 1
+        i+=1
+    print("\n=====================================================================================")
+    print("OPERACIÓN: CALCULAR FITNESS")
+    print("SECUENCIA DE ENTRADA:\t",seq_in)
+    print("SECUENCIA DE SALIDA:\t",seq_out)
 
-    
+    return matchs/(size_seq-1)
+#############################################################################################################
+def type_1(indi):# desactivar 1 estado
+    print("# desactivar 1 estado")
+    return indi
+def type_2(indi):# cambiar estado inicial
+    print("# cambiar estado inicial")
+    return indi
+def type_3(indi):# cambiar simbolos de entrada
+    print("# cambiar simbolos de entrada")
+    return indi
+def type_4(indi):# cambiar 1 simbolo de salida
+    print("# cambiar 1 simbolo de salida")
+    return indi
+def type_5(indi):# cambiar 1 estado de salida
+    print("# cambiar 1 estado de salida")
+    return indi
+def type_6(indi):# activar 1 estado
+    print("# activar 1 estado")
+    return indi
+
+def mutation_operator(population):
+    """Operador de mutación, a partir de esta función se genera los descendientes del individuo
+    Arguments:
+        population {list(string)} -- poblacion actual
+    Returns:
+        list(string) -- poblacion de descendientes
+    """
+    print("INICIANDO PROCESO DE MUTACIÓN")
+    new_p = []
+    mutant = ''
+    for i in range(len(population)):
+        rand_number = random.uniform(0,1)
+        print("Numero aleatorio: ", rand_number)
+        print("MUTACIÓN DEL INDIVIDUO N°: ", i)
+        if(rand_number > 0.0 and rand_number < 0.1):
+            mutant = type_1(population[i])
+
+            continue
+        elif(rand_number > 0.1 and rand_number < 0.3):
+            mutant = type_2(population[i])
+            continue
+        elif((rand_number > 0.3 and rand_number < 0.5)):
+            mutant = type_3(population[i])
+            continue
+        elif(rand_number > 0.5 and rand_number < 0.7):
+            mutant = type_4(population[i])
+            continue
+        elif(rand_number > 0.7 and rand_number < 0.9):
+            mutant = type_5(population[i])
+            continue
+        elif(rand_number > 0.9 and rand_number < 1.0):
+            mutant = type_6(population[i])
+            continue
+        else:
+            break
+        new_p.append(mutant)
+
+    return new_p
+
+def merge_asc_desc(ascends, descends):
     return 0
 
 
-
 def main():
-    """Función principal
-    """
+    """Función principal"""
     init_pop = generate_population(max_size_pop)
     print("··························POBLACIÓN INICIAL·······················")
-    print(init_pop)
-    print(fitness(climate_sequence, init_pop[0]))
+    print('POBLACION INICIAL', init_pop)
+    print('APTITUD del primer individuo: ',fitness(climate_sequence, init_pop[0]))
     # save_plots_pop(init_pop)
+    actual_pop = init_pop
+    for i in range(1):
+        print("\n\n================================================ ITERACIÓN ", i)
+        childs = mutation_operator(actual_pop)
+        actual_pop = merge_asc_desc(actual_pop, childs) # evaluar fitness aqui
+        print('DESCENDIENTES: ',childs)
+
+
+
+
 
 
 
