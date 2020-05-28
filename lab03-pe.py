@@ -109,7 +109,7 @@ def validate_inputs_state(individuo):
 def validate_mef(individuo):
     """ Valida la secuencia de un individuo o de un MEF dentro de los parametros asignados - retorna true o false"""
     a,b,c,d,e = divide_sequence(individuo)
-    if one_initial_state(individuo) == True and one_initial_state_v2(individuo) and validate_inputs_state(individuo) == True and count_active_states(individuo) > 2 :
+    if one_initial_state(individuo) == True and one_initial_state_v2(individuo) and validate_inputs_state(individuo) == True and count_active_states(individuo) > 3 :#modificado el count_active_states de 2 -> 3
         if (validate_state(a) and validate_state(b) and validate_state(c) and validate_state(d) and validate_state(e)):
             return True
         else: 
@@ -128,6 +128,8 @@ def plotdot(individuo, filen):
     """ Grafica la maquina de estado finito dada en el argumento y lo guarda en PNG """
     a,b,c,d,e = divide_sequence(individuo)
     # ACTIVE | INPUT 1 | INPUT 2 | OUTPUT 1 | OUTPUT 2 | NODE 1 | NODE 2
+    nodes = ['A','B','C','D','E']
+    states_array =[a,b,c,d,e]
     S = ''
     
     if '2' in a:
@@ -147,32 +149,59 @@ def plotdot(individuo, filen):
     f = Digraph('finite_state_machine', filename=filen)
     f.attr(rankdir='LR', size='8,5')
 
-    f.attr('node', shape='circle')
-    f.node('A')
-    f.node('B')
-    f.node('C')
-    f.node('D')
-    f.node('E')
-
     f.attr('node', shape='point')
     f.node('q1')
-
+   
+    i = 0
+    j=0
+    f.attr('node', shape='circle')
+    while (i < len(individuo)):
+        if(individuo[i] == '0'):
+            f.node(nodes[j], color="red")
+        else:
+            f.node(nodes[j], color="blue")
+        i+=7
+        j+=1
+    
     f.edge('q1', S, label='')
+    ii = 0
+    jj = 0
+    while (ii < len(individuo)):
+        if(individuo[ii] == '0'):
+            f.edge(nodes[jj], states_array[jj][5], label=states_array[jj][1]+' - '+states_array[jj][3], color="red")
+            f.edge(nodes[jj], states_array[jj][6], label=states_array[jj][2]+' - '+states_array[jj][4], color="red")
+        else:
+            f.edge(nodes[jj], states_array[jj][5], label=states_array[jj][1]+' - '+states_array[jj][3], color="blue")
+            f.edge(nodes[jj], states_array[jj][6], label=states_array[jj][2]+' - '+states_array[jj][4], color="blue")
+        ii+=7
+        jj+=1
+    #####################################
+    # f.node('A')
+    # f.node('B')
+    # f.node('C')
+    # f.node('D')
+    # f.node('E')
+    # f.attr('node', shape='point')
+    # f.node('q1')
 
-    f.edge('A', a[5], label=a[1]+' - '+a[3])
-    f.edge('A', a[6], label=a[2]+' - '+a[4])
+    # f.edge('q1', S, label='')
 
-    f.edge('B', b[5], label=b[1]+' - '+b[3])
-    f.edge('B', b[6], label=b[2]+' - '+b[4])
+    # f.edge('A', a[5], label=a[1]+' - '+a[3])
+    # f.edge('A', a[6], label=a[2]+' - '+a[4])
 
-    f.edge('C', c[5], label=c[1]+' - '+c[3])
-    f.edge('C', c[6], label=c[2]+' - '+c[4])
+    # f.edge('B', b[5], label=b[1]+' - '+b[3])
+    # f.edge('B', b[6], label=b[2]+' - '+b[4])
 
-    f.edge('D', d[5], label=d[1]+' - '+d[3])
-    f.edge('D', d[6], label=d[2]+' - '+d[4])
+    # f.edge('C', c[5], label=c[1]+' - '+c[3])
+    # f.edge('C', c[6], label=c[2]+' - '+c[4])
 
-    f.edge('E', e[5], label=e[1]+' - '+e[3])
-    f.edge('E', e[6], label=e[2]+' - '+e[4])
+    # f.edge('D', d[5], label=d[1]+' - '+d[3])
+    # f.edge('D', d[6], label=d[2]+' - '+d[4])
+
+    # f.edge('E', e[5], label=e[1]+' - '+e[3])
+    # f.edge('E', e[6], label=e[2]+' - '+e[4])
+    #####################################
+
 
     # f.view()
     f.save()
@@ -209,17 +238,106 @@ def generate_population(cant):
     list_of_inds = []
     for i in range(cant):
         inds = generate_random_individuo()
-        print("imprimiendo individuo: ", i)
         list_of_inds.append(recursive_mef(inds))
     return list_of_inds
+
+def mef(sinput, ind, table, sinit):
+    """maquina de estado finito que calcula la cadena de salida dado la cadena de entrada y sus estados
+
+    Arguments:
+        sinput {string} -- secuencia de entrada dado por el enunciado
+        ind {string} -- individuo 
+        table {dict} -- diccionario con key=estados, values=secuencia perteneciente a ese estado
+        sinit {char} -- estado inicial
+    Returns:
+        string -- Secuencia de salida
+    """
+    input_size = len(sinput)
+    soutput = ''
+    s_actual = sinit
+    for i in range(input_size):
+        if(table[s_actual][1] == '0'):
+            soutput += (table[s_actual][3])
+            s_actual = table[s_actual][5]
+        elif(table[s_actual][1] == '1'):
+            soutput += (table[s_actual][3])
+        elif(table[s_actual][2] == '0':
+            pass
+        elif(table[s_actual][2] == '1'):
+            pass
+        print('Input: ', table[s_actual][1])
+        print('Input: ', table[s_actual][2])
+        
+
+
+    return sinput
+
+def calc_seq_out(sec, ind):
+    """Calcula la secuencia de salida dada la secuencia de entrada y un individuo
+
+    Arguments:
+        sec {string} -- Secuencia de entrada dada por el enunciado
+        ind {string} -- Individuo generado aleatoriamente
+
+    Returns:
+        string -- Secuencia de salida
+    """
+    a,b,c,d,e = divide_sequence(ind)
+    calc = {'A':a, 'B':b, 'C':c, 'D':d, 'E':e}
+    sec_in = sec
+    # seq_out =
+    print("calc")
+    print(calc)
+    S = ''
+    if(ind[0] == '2'):
+        S = 'A'
+    elif(ind[7] == '2'):
+        S = 'B'
+    elif(ind[14] == '2'):
+        S = 'C'
+    elif(ind[21] == '2'):
+        S = 'D'
+    elif(ind[28] == '2'):
+        S = 'E'
+    else:
+        pass
+
+    sec_out = mef(sec_in, ind, calc, S)
+
+
+    
+    
+    # print(calc['A'])
+
+
+    return sec_out
+
+def fitness(secuencia, individuo):
+    """Calcula la aptitud de un individuo
+    Arguments:
+        secuencia {string} -- secuencia de entrada conformada de 1s y 0s
+        individuo {string} -- indiviudo conformado por maquina de estados finitos deterministas
+    Returns:
+        float -- retorna un valor float como el valor de aptitud del individuo
+    """
+    seq_in = secuencia
+    seq_out = calc_seq_out(seq_in, individuo)
+    size_ind = len(individuo)
+
+    
+    return 0
+
 
 
 def main():
     """Función principal
     """
     init_pop = generate_population(max_size_pop)
+    print("··························POBLACIÓN INICIAL·······················")
     print(init_pop)
-    save_plots_pop(init_pop)
+    print(fitness(climate_sequence, init_pop[0]))
+    # save_plots_pop(init_pop)
+
 
 
 main()
