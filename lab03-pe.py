@@ -585,7 +585,7 @@ def type_1(indi):  # desactivar 1 estado
     new_indi = processor(divide_sequence, indi, states[int(r)], 1)  # 1 es el tipo de mutacion elegida
     # print(list([char for char in a]))
     print(new_indi)
-    return indi
+    return new_indi
 
 
 def type_2(indi):  # cambiar estado inicial
@@ -595,8 +595,7 @@ def type_2(indi):  # cambiar estado inicial
     print("ESTADO ELEGIDO ALEATORIAMENTE: ", states[int(r)])
     new_indi = processor(divide_sequence, indi, states[int(r)], 2)  # 2 es el tipo de mutacion elegida
     print(new_indi)
-    return indi
-
+    return new_indi
 
 
 def type_3(indi):  # cambiar simbolos de entrada
@@ -606,7 +605,7 @@ def type_3(indi):  # cambiar simbolos de entrada
     print("ESTADO ELEGIDO ALEATORIAMENTE: ", states[int(r)])
     new_indi = processor(divide_sequence, indi, states[int(r)], 3)  # 3 es el tipo de mutacion elegida
     print(new_indi)
-    return indi
+    return new_indi
 
 
 def type_4(indi):  # cambiar 1 simbolo de salida
@@ -616,7 +615,7 @@ def type_4(indi):  # cambiar 1 simbolo de salida
     print("ESTADO ELEGIDO ALEATORIAMENTE: ", states[int(r)])
     new_indi = processor(divide_sequence, indi, states[int(r)], 4)  # 4 es el tipo de mutacion elegida
     print(new_indi)
-    return indi
+    return new_indi
 
 
 def type_5(indi):  # cambiar 1 estado de salida
@@ -626,7 +625,7 @@ def type_5(indi):  # cambiar 1 estado de salida
     print("ESTADO ELEGIDO ALEATORIAMENTE: ", states[int(r)])
     new_indi = processor(divide_sequence, indi, states[int(r)], 5)  # 5 es el tipo de mutacion elegida
     print(new_indi)
-    return indi
+    return new_indi
 
 
 def type_6(indi):  # activar 1 estado
@@ -661,32 +660,51 @@ def mutation_operator(population):
         print("* Numero aleatorio: ", rand_number)
         if (rand_number > 0.0 and rand_number < 0.1):
             mutant = type_1(population[i])
-
-            continue
         elif (rand_number > 0.1 and rand_number < 0.3):
             mutant = type_2(population[i])
-            continue
         elif ((rand_number > 0.3 and rand_number < 0.5)):
             mutant = type_3(population[i])
-            continue
         elif (rand_number > 0.5 and rand_number < 0.7):
             mutant = type_4(population[i])
-            continue
         elif (rand_number > 0.7 and rand_number < 0.9):
             mutant = type_5(population[i])
-            continue
         elif (rand_number > 0.9 and rand_number < 1.0):
             mutant = type_6(population[i])
-            continue
-        else:
-            break
         new_p.append(mutant)
-
     return new_p
 
 
 def merge_asc_desc(ascends, descends):
-    return 0
+    print("UNIENDO ASCENDENTES Y DESCENDENTES")
+    asc = []
+    des = []
+    merged = []
+    new_size = int(max_size_pop/2)
+    print(len(ascends))
+    print(len(descends))
+    for ind in ascends:
+        asc.append([ind, fitness(climate_sequence, ind)])
+        #ord = sorted(asc, key=lambda x: x[2])  # para ordenar
+    for ind in descends:
+        des.append([ind, fitness(climate_sequence, ind)])
+    print("#############COMPLETO ########################")
+    print(asc)
+    print("#############DIVIDIDO########################")
+    asc_ord = sorted(asc, key=lambda x:x[1])
+    asc_ord = asc_ord[new_size::1]
+    print(asc_ord)
+    ##############################################################
+    print("#############COMPLETO ########################")
+    print(des)
+    print("#############DIVIDIDO########################")
+    des_ord = sorted(des, key=lambda x: x[1])
+    des_ord = des_ord[new_size::1]
+    print(des_ord)
+    ##########################################################
+    for i in range(new_size):
+        merged.append(asc_ord[i][0])
+        merged.append(des_ord[i][0])
+    return merged
 
 
 def main():
@@ -697,11 +715,13 @@ def main():
     print('APTITUD del primer individuo: ', fitness(climate_sequence, init_pop[0]))
     # save_plots_pop(init_pop)
     actual_pop = init_pop
-    for i in range(1):
+    for i in range(10): #iteraciones (i)
         print("\n\n================================================ ITERACIÓN ", i)
         childs = mutation_operator(actual_pop)
-        actual_pop = merge_asc_desc(actual_pop, childs)  # evaluar fitness aqui
+        print('ASCENDIENTES: ', actual_pop)
         print('DESCENDIENTES: ', childs)
+        actual_pop = merge_asc_desc(actual_pop, childs)  # evaluar fitness aqui
+        print('NUEVA POBLACION: ', actual_pop)
 
 
 main()
