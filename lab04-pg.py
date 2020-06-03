@@ -249,17 +249,52 @@ def replicacion(pob, r):
     a2=aptitud(pob[fighters[1]])# ver
     a3=aptitud(pob[fighters[2]])# ver
     maxi = max([a1,a2,a3])
-    pob[pob.index(maxi)]
-    
-    return pob
+    chosen = pob[pob.index(maxi)]
+    print('ELEGIDO')
+    print(chosen)
+    return chosen
 
 def cruzamiento(pob, r):
     print('INICIO DE CRUZAMIENTO \t Probabilidad dada: ', r)
-    return pob
+    print('PADRE 1')
+    p1r1,p1r2 = random.randint(0, size_pop-1), random.randint(0, size_pop-1)
+    padre1 = ''
+    padre2 = ''
+    selected = lambda x: p1r1 > p1r2
+    if selected:
+        padre11 = p1r1
+    else:
+        padre11 = p1r2
+
+    print('PADRE 2')
+    p2r1, p2r2 = random.randint(0, size_pop - 1), random.randint(0, size_pop - 1)
+    selected = lambda x: p1r1 > p1r2
+    if selected:
+        padre2 = p1r1
+    else:
+        padre2 = p1r2
+
+    c = random.randint(0,size_genes)
+    print('Cruzamiento en el punto: ', c)
+    c = np.array(padre1)[0:c] + np.array(padre2[c+1:])
+    return c
 
 def mutacion(pob, r):
     print('INCICIO DE MUTACION \t Probabilidad dada: ', r)
-    return pob
+    print('Seleccionar 3 para torneo')
+    fighters = [random.randint(0, size_pop-1), random.randint(0, size_pop-1), random.randint(0, size_pop-1)]
+    a1 = aptitud(pob[fighters[0]])  # ver
+    a2 = aptitud(pob[fighters[1]])  # ver
+    a3 = aptitud(pob[fighters[2]])  # ver
+    maxi = max([a1, a2, a3])
+    chosen = pob[pob.index(maxi)]
+    print('ELEGIDO')
+    print(chosen)
+    r = random.randint(0,len(size_genes))
+    print('CRUZAMIENTO EN EL PUNTO: ', r)
+    for i in range(r):
+        pass 
+    return chosen
 
 
 def calcular_aptitudes(pop):
@@ -284,7 +319,7 @@ def main():
     print("TABLA INPUT-OUTPUT", type(tableIO))
     imprimir(tableIO)
     pobl_actual = pobl_ini
-    for i in range(1): #  generations 
+    for i in range(generations): #  generations
         print(' ------------------------------- ITERACIÓN N°: ', i)
         # aptitudes = list(map(aptitud, pobl_actual))
         pob_con_aptitudes = calcular_aptitudes(pobl_actual)
