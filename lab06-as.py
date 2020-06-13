@@ -34,6 +34,7 @@ iters = 2
 ###############################################################
 
 class AntSystem:
+    """Clase AntSystem"""
     def __init__(self, _distancias, _fi, _alfa, _beta, _ro, _Q, _ant_cant, _iters, _ciudad_inicial):
         self.distancias = _distancias # d_ij
         self.fi = _fi
@@ -49,6 +50,7 @@ class AntSystem:
         self.ciudad_inicial = _ciudad_inicial
 
     def exe(self):
+        """ Ejecución del objeto de la clase"""
         print('Tabla de distancias')
         print(tabulate(self.distancias, headers=self.ciudades, showindex=self.ciudades, tablefmt='grid', stralign='center'))
         print('\n\n Tabla de visibilidad')
@@ -81,6 +83,13 @@ class AntSystem:
                 print(ruta_hormiga)
 
     def seleccionar(self, tramos, ciudades):
+        """Selecciona las siguientes ciudades que elegirá la hormiga
+        Args:
+            tramos (list): Todos los tramos posibles que una hormiga puede presentar
+            ciudades (list): Pila de ciudades disponibles
+        Returns:
+            char: Siguiente ciudad
+        """
         print('FUNCION SELECCIONAR')
         excel = np.array([])
         for tramo in tramos:
