@@ -28,43 +28,98 @@ ro = 0.99
 # constante Q
 Q = 1
 # cantidad de hormigas
-ant_cant = 4
-
+ant_cant = 2
+# iteraciones
+iters = 2
 ###############################################################
-data = {
-    'A':{'B':12,'C':3,'D':23,'E':1,'F':5,'G':23,'H':56,'I':12,'J':11},
-    'B':{'A':12,'C':9,'D':18,'E':3,'F':41,'G':45,'H':5,'I':41,'J':27},
-    'C':{'A':3,'B':9,'D':89,'E':56,'F':21,'G':12,'H':48,'I':14,'J':29},
-    'D':{'A':23,'B':18,'C':89,'E':87,'F':46,'G':75,'H':17,'I':50,'J':42},
-    'E':{'A':1,'B':3,'C':56,'D':87,'F':55,'G':22,'H':86,'I':14,'J':33},
-    'F':{'A':5,'B':41,'C':21,'D':46,'E':55,'G':21,'H':76,'I':54,'J':81},
-    'G':{'A':23,'B':45,'C':12,'D':75,'E':22,'F':21,'H':11,'I':57,'J':48},
-    'H':{'A':56,'B':5,'C':48,'D':17,'E':86,'F':76,'G':11,'I':63,'J':24},
-    'I':{'A':12,'B':41,'C':14,'D':50,'E':14,'F':54,'G':57,'H':63,'J':9},
-    'J':{'A':11,'B':27,'C':29,'D':42,'E':33,'F':81,'G':48,'H':24,'I':9}
-}
 
 class AntSystem:
-    def __init__(self, _distancias, _fi, _alfa, _beta, _ro, _Q, _ant_cant):
-        self.tsp = _distancias # d_ij
+    def __init__(self, _distancias, _fi, _alfa, _beta, _ro, _Q, _ant_cant, _iters, _ciudad_inicial):
+        self.distancias = _distancias # d_ij
         self.fi = _fi
         self.alfa = _alfa
         self.beta = _beta
         self.ro = _ro
         self.Q = _Q
         self.ant_cant = _ant_cant
-        self.feromonas = np.abs(np.identity(np.size(_distancias[0]), dtype=float) - 1) * _fi # t_ij
-        self.indices = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
+        self.feromonas = np.abs(np.identity(np.size(self.distancias[0]), dtype=float) - 1) * _fi # t_ij
+        self.ciudades = [chr(word) for word in range(65, 65 + np.size(self.distancias[0]))]
         self.visibilidad = 1 / _distancias # 1/(d_ij)
+        self.iters = _iters
+        self.ciudad_inicial = _ciudad_inicial
 
     def exe(self):
-        print('Tabla de rutas TSP')
-        print(tabulate(self.tsp, headers=self.indices, showindex=self.indices, tablefmt='grid', stralign='center'))
+        print('Tabla de distancias')
+        print(tabulate(self.distancias, headers=self.ciudades, showindex=self.ciudades, tablefmt='grid', stralign='center'))
         print('\n\n Tabla de visibilidad')
-        print(tabulate(self.visibilidad, headers=self.indices, showindex=self.indices, stralign='center', tablefmt='grid'))
+        print(tabulate(self.visibilidad, headers=self.ciudades, showindex=self.ciudades, stralign='center', tablefmt='grid'))
         print('\n\n Tabla de feromonas')
-        print(tabulate(self.feromonas, headers=self.indices, showindex=self.indices, stralign='center', tablefmt='grid'))
+        print(tabulate(self.feromonas, headers=self.ciudades, showindex=self.ciudades, stralign='center', tablefmt='grid'))
+        print(self.ciudades)
+        for ite in range(iters): #iteracion ite
+            print('\n ITERACIÓN Nº: ', ite)
+            for iant in range(ant_cant): # hormiga iant
+                pila_ciudades = self.ciudades.copy()
+                ciudad_actual = self.ciudad_inicial
+                ruta_hormiga = [self.ciudad_inicial]
+                print('\n HORMIGA Nº: ', iant) # hormiga iant
+                try:
+                    while pila_ciudades: # NO ESTE VACIO
+                        pila_ciudades.pop(pila_ciudades.index(ciudad_actual))
+                        tramo = [[ciudad_actual, destino] for destino in pila_ciudades]
+                        print('\n CIUDAD ACTUAL: ', ciudad_actual )
+                        print('TRAMOS POSIBLES:')
+                        print(tramo)
+                        # ciudad_actual = random.choice(pila_ciudades)
+                        # self.seleccionar(tramo, pila_ciudades) #test
+                        siguiente_ciudad = self.seleccionar(tramo, pila_ciudades)
+                        ciudad_actual = siguiente_ciudad
+                        ruta_hormiga.append(ciudad_actual)
+                except IndexError:
+                    print('No hay mas ciudades disponibles')
+                print('Ruta elegida por la hormiga Nº ', iant)
+                print(ruta_hormiga)
 
+    def seleccionar(self, tramos, ciudades):
+        print('FUNCION SELECCIONAR')
+        excel = np.array([])
+        for tramo in tramos:
+            tij = self.feromonas[self.ciudades.index(tramo[0]), self.ciudades.index(tramo[1])]
+            nij = self.visibilidad[self.ciudades.index(tramo[0]), self.ciudades.index(tramo[1])]
+            tijxnij = (tij ** self.alfa) * (nij ** self.beta)
+            # print('========================')
+            # print(tij)
+            # print(nij)
+            # print(tijxnij)
+            row = np.array([tij,nij,tijxnij])
+            excel = np.append(excel, row, axis=0)
+            # excel = np.concatenate((excel, row))
+        # print(np.size(tramos))
+        # print(tramos[0])
+        excel = np.reshape(excel, (np.size(tramos) // 2, 3))
+        print('IMPRIMIR TRAMOS NUMPY')
+        # print(excel.shape)
+        sumatoria = np.sum(excel[:,-1])
+        # print(excel)
+        pij = excel[:,-1] / sumatoria
+        pij = np.reshape(pij, (np.size(tramos) // 2, 1))
+        ruleta = np.cumsum(pij, axis=0)
+        # print(pij)
+        # print(ruleta)
+        excel = np.append(excel,pij, axis=1)
+        excel = np.append(excel, ruleta, axis=1)
+        # print(np.append(np.reshape(tramos, (np.size(tramos)//2, 2)), excel ,axis=1))
+        print(excel)
+        print('Sumatoria Pij: ', sumatoria)
+        aleatorio = random.uniform(0,1)
+        print('Número aleatorio: ', aleatorio)
+        # indice = np.where(excel[:,-1] <= aleatorio)[0][-1]
+        indice = np.where(aleatorio <= excel[:,-1])[0][0] #extrae el primer indice del array de indices
+        sig_ciudad = tramos[indice][-1]
+        print('indice: ',indice)
+        print('Siguiente ciudad', sig_ciudad)
+        print()
+        return  sig_ciudad
 
 
 
@@ -82,7 +137,7 @@ tabla_rutas = np.array([
     [11, 27, 29, 42, 33, 81, 48, 24, 9, np.inf]
 ])
 
-ant_system = AntSystem(tabla_rutas, fi, alfa, beta, ro, Q, ant_cant)
+ant_system = AntSystem(tabla_rutas, fi, alfa, beta, ro, Q, ant_cant, iters, 'A')
 
 ant_system.exe()
 
