@@ -15,7 +15,7 @@
 import numpy as np
 import random
 from tabulate import tabulate
-
+###############################################################
 # Constantes
 # feromona inicial
 fi = 0.1
@@ -28,7 +28,7 @@ ro = 0.99
 # constante Q
 Q = 1
 # cantidad de hormigas
-ant_cant = 2
+ant_cant = 4
 # iteraciones
 iters = 2
 ###############################################################
@@ -77,7 +77,7 @@ class AntSystem:
                         ruta_hormiga.append(ciudad_actual)
                 except IndexError:
                     print('No hay mas ciudades disponibles')
-                print('Ruta elegida por la hormiga Nº ', iant)
+                print('--> Ruta elegida por la hormiga Nº ', iant)
                 print(ruta_hormiga)
 
     def seleccionar(self, tramos, ciudades):
@@ -108,8 +108,9 @@ class AntSystem:
         # print(ruleta)
         excel = np.append(excel,pij, axis=1)
         excel = np.append(excel, ruleta, axis=1)
-        # print(np.append(np.reshape(tramos, (np.size(tramos)//2, 2)), excel ,axis=1))
-        print(excel)
+        numpy_header = ['i', 'j', 'ti', 'nij', 'tij*nij', 'Pij', 'ruleta']
+        print(tabulate(np.append(np.reshape(tramos, (np.size(tramos)//2, 2)), excel ,axis=1), tablefmt='grid', headers=numpy_header)) #version 1
+        # print(excel) # version 2
         print('Sumatoria Pij: ', sumatoria)
         aleatorio = random.uniform(0,1)
         print('Número aleatorio: ', aleatorio)
