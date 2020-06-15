@@ -28,9 +28,9 @@ ro = 0.99
 # constante Q
 Q = 1
 # cantidad de hormigas
-ant_cant = 4
+ant_cant = 6
 # iteraciones
-iters = 2
+iters = 1000
 ###############################################################
 
 class AntSystem:
@@ -60,6 +60,8 @@ class AntSystem:
         print(self.ciudades)
         for ite in range(iters): #iteracion ite
             print('\n ITERACIÓN Nº: ', ite)
+            list_routes = []
+
             for iant in range(ant_cant): # hormiga iant
                 pila_ciudades = self.ciudades.copy()
                 ciudad_actual = self.ciudad_inicial
@@ -81,6 +83,23 @@ class AntSystem:
                     print('No hay mas ciudades disponibles')
                 print('--> Ruta elegida por la hormiga Nº ', iant)
                 print(ruta_hormiga)
+                list_routes.append(ruta_hormiga) # lista de rutas elegidas por las hormigas
+            ## ======================================================
+            print('LISTA DE RUTAS ELEGIDAS POR LAS HORMIGAS')
+            i = 0
+            for route in list_routes:
+                print('HORMIGA N° {0}: {1}'.format(i, route))
+                i += 1
+            ## ======================================================
+            # calculando el costo de las rutas
+            costos_rutas = self.calc_costos(list_routes, self.Q)
+            print(costos_rutas)
+            ## ======================================================
+            # Actualizando las tabla de feromonas.
+            self.feromonas =  self.fparciales(list_routes, costos_rutas)
+            print('NUEVA TABLA DE FEROMONAS')
+            print(tabulate(self.feromonas, headers=self.ciudades, showindex=self.ciudades, tablefmt='grid'))
+
 
     def seleccionar(self, tramos, ciudades):
         """Selecciona las siguientes ciudades que elegirá la hormiga
@@ -131,6 +150,83 @@ class AntSystem:
         print()
         return  sig_ciudad
 
+    def calc_costos(self, routes_list, q):
+        """
+        Args:
+            routes_list (list): lista de rutas
+            q (int): constante q
+        Returns:
+            int: Q/Lk
+        """
+        costos = np.array([])
+        for route in routes_list:
+            ii, jj, suma = 0, 1, 0
+            while ii < len(route) - 1:
+                x, y = route[ii], route[jj]
+                suma += self.distancias[self.ciudades.index(x), self.ciudades.index(y)]
+                ii += 1
+                jj += 1
+            costos = np.append(costos, suma)
+        print('COSTOS: ', costos)
+        return q/costos
+
+    def get_step_indexes(self, i, j, rutas, costos):
+        """ Obtiene los indices por donde pasa la hormiga
+        Args:
+            i (int): indice x
+            j (int): indice y
+            rutas (list): lista de las rutas
+            costos (list): lista de los costos
+        Returns:
+            list: lista de indices
+        """
+        cant_hormigas = len(costos)
+        a = self.ciudades[i]
+        b = self.ciudades[j]
+        indices = []
+        for i in range(cant_hormigas):
+            string_ruta = ''.join(rutas[i])
+            if (a+b) in string_ruta:
+                indices.append(i)
+        return indices
+
+
+    def suma_parcial(self, indexes, costos):
+        """sumatoria parcial
+        Args:
+            indexes (list): lista de indices
+            costos (list): lista de costos
+        Returns:
+            float: suma total
+        """
+        suma = 0
+        for i in range(len(indexes)):
+            suma += costos[indexes[i]]
+        return suma
+
+    def fparciales(self, lista_rutas, lista_costos):
+        """Feromonas parciales
+
+        Args:
+            lista_rutas (list): lista de rutas
+            lista_costos (list): lista de costos
+
+        Returns:
+            numpy.array: actualizacion de las feromonas
+        """
+        fero = np.copy(self.feromonas)
+        first = fero * self.ro
+        second = np.copy(self.feromonas) * 0
+        i = 0
+        while i < len(fero[0]):
+            j = i + 1
+            indices_paso = []
+            while j < len(fero[0]):
+                indices_paso = self.get_step_indexes(i, j, lista_rutas, lista_costos)
+                second[i,j] = second[j, i] = self.suma_parcial(indices_paso, lista_costos)
+                j += 1
+            i += 1
+        return first + second
 
 
 
