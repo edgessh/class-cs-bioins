@@ -33,7 +33,7 @@ q0 = 0.5
 #constante phi para la actualizacion de feromona  local
 phi = 0.5
 # iteraciones
-iters = 10
+iters = 100
 ###############################################################
 
 class AntSystem:
@@ -92,6 +92,7 @@ class AntSystem:
                                 print('ACTUALIZANDO TRAMO: {0} - {1}'.format(ca_var, siguiente_ciudad))
                                 # print(ca_var)
                                 # print(siguiente_ciudad)
+                                # ACTUALIZACION ONLINE
                                 self.feromonas[ self.ciudades.index(ca_var) ][
                                     self.ciudades.index(siguiente_ciudad) ] = (1 - self.phi) * self.feromonas[
                                     self.ciudades.index(ca_var) ][
@@ -104,6 +105,7 @@ class AntSystem:
                             # self.seleccionar(tramo, pila_ciudades) #test
                             # siguiente_ciudad = self.seleccionar(tramo, pila_ciudades)
                         else: # q > q0
+                            # ACTUALIZACION ONLINE
                             print('Construcción de solución por Diversificación')
                             siguiente_ciudad = self.seleccionar_diversificacion(tramo, pila_ciudades)
                             ciudad_actual = siguiente_ciudad
@@ -135,7 +137,8 @@ class AntSystem:
             ## ======================================================
             # Actualizando las tabla de feromonas.
             # mejor hormiga global
-            self.feromonas =  self.fparciales(list_routes, costos_rutas)
+            self.actualizacion_offline(list_routes, costos_rutas)
+            # self.feromonas =  self.fparciales(list_routes, costos_rutas)
             print('NUEVA TABLA DE FEROMONAS')
             print(tabulate(self.feromonas, headers=self.ciudades, showindex=self.ciudades, tablefmt='grid'))
 
@@ -268,65 +271,51 @@ class AntSystem:
         print('COSTOS: ', costos)
         return q/costos
 
-    def get_step_indexes(self, i, j, rutas, costos):
+    def get_step_indexes(self, i, j, max_ruta, costos):
         """ Obtiene los indices por donde pasa la hormiga
         Args:
             i (int): indice x
             j (int): indice y
-            rutas (list): lista de las rutas
+            max ruta (list): maxima ruta
             costos (list): lista de los costos
         Returns:
             list: lista de indices
         """
-        cant_hormigas = len(costos)
+        # cant_hormigas = len(costos)
         a = self.ciudades[i]
         b = self.ciudades[j]
         indices = []
-        for i in range(cant_hormigas):
-            string_ruta = ''.join(rutas[i])
-            if (a+b) in string_ruta:
-                indices.append(i)
+        string_ruta = ''
+        for w in max_ruta:
+            string_ruta = ''.join(w)
+        if (a+b) in string_ruta:
+            indices.append(i)
+            indices.append(j)
         return indices
 
 
-    def suma_parcial(self, indexes, costos):
-        """sumatoria parcial
-        Args:
-            indexes (list): lista de indices
-            costos (list): lista de costos
-        Returns:
-            float: suma total
-        """
-        suma = 0
-        for i in range(len(indexes)):
-            suma += costos[indexes[i]]
-        return suma
 
-    def fparciales(self, lista_rutas, lista_costos):
-        """Feromonas parciales
 
-        Args:
-            lista_rutas (list): lista de rutas
-            lista_costos (list): lista de costos
+    def actualizacion_offline(self, list_routes, costos_rutas):
+        maximo = np.max(costos_rutas)
+        indice = np.where(costos_rutas == maximo)[0][0]
+        print(indice)
+        print('Ruta del máximo global: ', list_routes[indice])
+        print('Costo máximo global: ', maximo)
 
-        Returns:
-            numpy.array: actualizacion de las feromonas
-        """
-        fero = np.copy(self.feromonas)
-        first = fero * self.p
+        self.feromonas *= (1 - self.p)
         second = np.copy(self.feromonas) * 0
+        max_ruta = list_routes[indice]
+
         i = 0
-        while i < len(fero[0]):
+        while i < len(self.feromonas[0]):
             j = i + 1
-            indices_paso = []
-            while j < len(fero[0]):
-                indices_paso = self.get_step_indexes(i, j, lista_rutas, lista_costos)
-                second[i,j] = second[j, i] = self.suma_parcial(indices_paso, lista_costos)
+            while j < len(self.feromonas[0]):
+                if [i,j] == self.get_step_indexes(i, j, max_ruta, costos_rutas):
+                    self.feromonas[i, j] += self.feromonas[i,j]*self.p
+                    self.feromonas[j, i] += self.feromonas[j,i]*self.p
                 j += 1
             i += 1
-        return first + second
-
-
 
 
 tabla_rutas = np.array([
@@ -341,6 +330,18 @@ tabla_rutas = np.array([
     [12, 41, 14, 50, 14, 54, 57, 63, np.inf, 9],
     [11, 27, 29, 42, 33, 81, 48, 24, 9, np.inf]
 ])
+
+print('PARAMETROS')
+# Constantes
+print('feromona inicial', fi)
+print('valor alfa: ', alfa)
+print('valor beta:', beta)
+print('valor de p: ', p)
+print('constante Q: ', Q)
+print('cantidad de hormigas: ', ant_cant)
+print('q0: ', q0)
+print('constante phi: ', phi)
+print('iteraciones: ', iters)
 
 ant_system = AntSystem(tabla_rutas, fi, alfa, beta, p, Q, ant_cant, phi, q0, iters, 'A')
 
