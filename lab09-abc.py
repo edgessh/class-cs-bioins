@@ -107,7 +107,7 @@ def calcular_prob_ini(cands, fu):
     indices = np.where(cands[:,7] == 'SI')
     # print(indices[0])
     # print(soluciones_prob)
-    if np.size(indices[0 ])>0:
+    if np.size(indices[0])>0:
         for id in indices[0]:
             soluciones_prob[id,1:] = cands[id,3:7]
 
@@ -241,22 +241,15 @@ def main():
 
 
 
-
-
-
-
-
-
-print("pp")
 print("""
-Implemente el Algoritmo ABC (Artificial Bee Colony) para minimizar la siguiente función:
+Implemente el Algoritmo ABC (Artificial Bee Colony) para minimizar la siguiente funcion:
 f (x,y) = (x + 2y − 7)^2 + (2x + y − 5)^2
-−10 ≤ x ≤ 10
-−10 ≤ y ≤ 10
-• SN = 3
-• itermax ≤ 200.
-• Limite = 6
-• Decimales >=3
+−10 < = x < = 10
+−10 < = y < = 10
+ SN = 3
+ itermax < =  200.
+ Limite = 6
+ Decimales > = 3
 """)
 
 
@@ -264,9 +257,9 @@ SN = 3
 iters = 100
 limite = 6
 encabezado_fuente = ['Fuente', 'X', 'Y', 'f(X,Y)', 'Fit', 'Cont']
-encabezado_solucion = ['K','J', 'Φ', 'X', 'Y', 'f(X,Y)', 'Fit', 'Mejora?',  'Cont']
+encabezado_solucion = ['K','J', 'phi', 'X', 'Y', 'f(X,Y)', 'Fit', 'Mejora?',  'Cont']
 encabezado_probabilidad = ['Fuente', 'X', 'Y', 'f(X, Y)', 'fit', 'inv fit', 'Prob', 'Cont']
-encabezado_observ = ['Φ','X','Y','f(X,Y)','fit','Mejora?', 'Cont']
+encabezado_observ = ['phi','X','Y','f(X,Y)','fit','Mejora?', 'Cont']
 # Fuentes iniciales
 xy = [[random.uniform(-10, 10), random.uniform(-10, 10)] for i in range(SN)]
 fuente = np.array(xy)
