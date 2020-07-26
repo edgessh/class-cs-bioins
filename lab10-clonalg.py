@@ -17,6 +17,7 @@ import itertools
 
 def enunciate(fun):
     print("""
+    CLONALG
     PARAMETROS:
         sizeP = 7
         sizeF = 5
@@ -42,7 +43,7 @@ def cost(route):
         total += tabla_rutas[dict_cities[route[i]]][dict_cities[route[i+1]]]
     return total
 
-def sort(_pop, _costs):
+def sort(_pop, _costs): #revisar
     data_pop = np.array([_pop])[0]
     data_cost = np.reshape(np.array([_costs]), (len(_costs), 1))
     # merging
@@ -60,18 +61,57 @@ def sort(_pop, _costs):
     return ll, final_cost
     # return _pop, _costs
 
-def imprint(pop, show=False):
+def sort_v2(_pop, _costs):
+    temp_costs = _costs
+    sorted_costs = sorted(temp_costs)
+    dic = {}
+    for i in range(len(temp_costs)):
+        dic[temp_costs[i]] = _pop[i]
+    lista_sdic = sorted(dic.items())
+    new_pop = []
+    new_costs = []
+    print(lista_sdic[0][0])
+    print(lista_sdic[0][1])
+    print(lista_sdic[-1])
+    print(lista_sdic)
+    #
+    for j in range(len(temp_costs)):
+        new_costs.append(lista_sdic[j][0])
+        new_pop.append(lista_sdic[j][1])
+    new_pop = new_pop[0:5]
+    new_costs = new_costs[0:5]
+    print('-------------------------------------------------------')
+    print(new_pop)
+    print(new_costs)
+
+    return new_pop, new_costs
+
+
+def imprint(pop, show=False, hyper=False):
     rows = [] #costs
-    if show:
-        for item in pop:
-            print(str(''.join(item)) + ' ' + str(cost(item)))
-            rows.append(cost(item))
-        return sort(pop,rows)
-    else :
-        for item in pop:
-            print(str(''.join(item)) + ' ')
-            rows.append(cost(item))
-        return sort(pop,rows)
+    if hyper:
+        if show:
+            for item in pop:
+                print(str(''.join(item)) + ' ' + str(cost(item)))
+                rows.append(cost(item))
+            return pop, rows
+        else:
+            for item in pop:
+                print(str(''.join(item)) + ' ')
+                rows.append(cost(item))
+            return pop, rows
+    else:
+        if show:
+            for item in pop:
+                print(str(''.join(item)) + ' ' + str(cost(item)))
+                rows.append(cost(item))
+            return sort(pop,rows)
+        else:
+            for item in pop:
+                print(str(''.join(item)) + ' ')
+                rows.append(cost(item))
+            return sort(pop,rows)
+
 
 def f_population(sizeF, pop, costs):
     for i in range(len(pop)):
@@ -85,6 +125,11 @@ def f_population(sizeF, pop, costs):
     # sorted(fpop)
     # for i in range(sizeF):
     return fpop
+
+def f_population_v2(sizeF, pop, costs):
+    [fpop, fpopc] = sort(pop, costs)
+    return fpop[0:sizeF]
+    # return pop[0:sizeF]
 
 
 def get_pclone(pf):
@@ -105,13 +150,15 @@ def get_pclone(pf):
 def mutation(route, cant):
     indexes = []
     for i in range(cant):
+        # print('cantidad de mutaciones: ', cant)
         r1 = random.randint(0, len(ciudades) - 1)
         r2 = random.randint(0, len(ciudades) - 1)
         temp = route[r1]
         route[r1] = route[r2]
         route[r2] = temp
         indexes.append([r1,r2])
-        print('mutaciones: ', len(indexes))
+        # print('\naleatorios: ', [r1, r2])
+        # print('\nmutaciones: ', len(indexes))
     # print(route)
     # print(indexes)
     return route, indexes
@@ -120,58 +167,119 @@ def mutation(route, cant):
 def s_population(clones, size): # size = 5 en este caso
     hypers = []
     pop_s = []
+    best_s = []
+    hyp_indexes = []
     i = 0
     k = size
-    print(clones)
+    m = 1
+    # print(clones)
     print('=====================')
-
     while i < len(clones):
         j = i
-        l = k
-        m = 1
+        l = k    
         while l > 0:
             [clones[j], ind]  = mutation(clones[j], m)
-            print('estado de j: ',j)
-            print(clones[j])
-            print(ind)
-            j  += 1
+            # print('estado de j: ',j)
+            # print(clones[j])
+            # hyp_indexes.append(ind)
+            print('{0} ==> {1}'.format(clones[j], ind))
+
+            j += 1
             l -= 1
         i += k
         k -= 1
         m += 1
+    #print(clones)
+    print('========================')
+    [hyp, hypc] = imprint(clones, True, True)
 
-    # print(clones)
-    # print(hypers)
+    s_pop = []
+    s_pop_c = []
+    h_i = 0
+    h_k = size
+    # print(hypc[h_i])
+    while h_i < len(clones):
+        h_j = h_i
+        h_l = h_k
+        minimun = hypc[h_j]
+        # print('minimo: ',minimun)
+        # print(minimun == hypc[h_j])
+        route_minimun = hyp[h_j]
+        while h_l > 0:
+            if hypc[h_j] < minimun:
+                minimun = hypc[h_j]
+                route_minimun = hyp[h_j]
 
-    # [line, inds] = mutation(clones[0], 2)
+            h_j += 1
+            h_l -= 1
+        s_pop.append(route_minimun)
+        s_pop_c.append(minimun)
+        h_i += h_k
+        h_k -= 1
 
+    print('\nPoblación S')
+    print('============================')
+    # print(s_pop)
+    # print(s_pop_c)
+    return s_pop
+
+
+
+def r_population(n):
+    r_p = []
+    for i in range(n):
+        r_p.append(random.sample(ciudades, 10))
+    print('\nPoblación R')
+    print('============================')
+    return r_p
+
+def merge(sp, sc, rp, rc,  fp, fc):
+    new_pp = sp
+    ordered = sort(fp, fc)
+    new_fp = ordered[0][0:2]
+    new_fpc = ordered[1][0:2]
+    # print(new_fp)
+    # print(new_fpc)
+
+    parcialp = rp + new_fp
+    parcialc = rc + new_fpc
+
+    final = sort(parcialp, parcialc)
+
+    # print(final)
+
+    # print(parcialp)
+    # print(parcialc)
+
+    # new_pp.append(result)
+    print('\nPoblación P')
+    return new_pp + final[0][0:2]
 
 @enunciate
 def main(iterat):
     print(tabulate(tabla_rutas, headers=ciudades, showindex=ciudades, tablefmt='grid'))
     p = p_population(7, ciudades)
     print('\nPoblación [ P ]')
-    [p, c] = imprint(p, True)
+    [p, pc] = imprint(p, True)
     # print('tamaño: ', len(p))
     for i in range(iterat):
-        print('iteration: ', iterat)
+        print('\n\n\t ITERACIÓN: ', i)
+        print('=========')
         print('\nPoblación [ F ]')
-        [f,fc] = imprint(f_population(5, p, c ), True)
+        [f,fc] = imprint(f_population_v2(5, p, pc ), True, False)
         print('\nPoblación P-Clone')
         [pclone, pclone_c] = imprint(get_pclone(f))
         print('\nPoblación P-Hyper')
         # el de menor costo requiere pocas mutaciones, y el de mayor costo requiere de varias mutaciones
-        print(pclone[0])
-        # phyper = mutation(pclone, len(f))
-        s_population(pclone, len(f)) #p_hyper
-        # [s,sc] = imprint(s_population(pclone, len(f)))
 
+        # s_population(pclone, len(f)) #p_hyper
+        [s,sc] = imprint(s_population(pclone, len(f)), True, False)
 
+        [r, rc] = imprint(r_population(2), True, False)
 
+        [p, pc] = imprint(merge(s, sc, r, rc, f, fc), True, False) # de tamaño = 7
 
-        # get_pclone(f)
-        # print(pclone)
-
+        
 
 
 
@@ -194,4 +302,16 @@ tabla_rutas = np.array([
     [45, 58, 16, 11, 41, 97, 29, 28, 1, np.inf]
 ])
 
-main(1)
+main(200)
+"""
+Comentario: No siempre llega al minimo ABCDEFGHIJ de costo 9
+* Esto se debe a que por la aleatoriedad de los numeros se queda sin generar cambios totales a la ruta optima
+* Requiere de mas iteraciones para que al menos R empiece con 'A' y tenga mayor aproximación al optimo 
+* Y en la practica hay un error. No se ha considerado el menor de la poblacion R (282)  en la 1ra iteración siendo menor que los mejores de F:
+ Población R 
+1) DIHECGJABF	304.0
+2) GBJFAHIEDC	282.0
+ 
+
+"""
+print(cost(['A','B','C','D','E','F','G','H','I','J']))
